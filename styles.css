@@ -1,0 +1,279 @@
+:root{
+  /* Paleta y ajustes globales */
+  --overlay-a: .55;
+  --gold: #ffd451;
+
+  /* Ojos (puedes cambiarlos si hiciera falta) */
+  --eye-size: 10%;
+  --eye-ratio: .75;
+  --eye-left-x: 42%;
+  --eye-left-y: 41.5%;
+  --eye-right-x: 58%;
+  --eye-right-y: 41.5%;
+}
+
+*{ box-sizing: border-box; }
+html, body{ height: 100%; }
+
+body{
+  margin: 0;
+  color: #eaf3ff;
+  background: #000;
+  overflow: hidden;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+
+/* =========================================================
+   2) FONDO (IMAGEN + SOMBRA GRADUAL)
+   ========================================================= */
+.bg{
+  position: fixed;
+  inset: 0;
+  background: url('imagenes/bg.png') center/cover no-repeat;
+  z-index: 0;
+}
+
+.shade{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(5,10,25,calc(var(--overlay-a)*.6)) 0%,
+    rgba(5,10,25,var(--overlay-a)) 55%,
+    rgba(4,7,18,calc(var(--overlay-a)*1.1)) 100%
+  );
+}
+
+
+/* =========================================================
+   3) VISTAS / CONTENEDORES
+   ========================================================= */
+.view{
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .7s ease;
+}
+.view--active{ opacity: 1; pointer-events: auto; }
+.view--hidden{ opacity: 0; pointer-events: none; }
+
+.stack{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: clamp(16px, 3vw, 28px);
+}
+
+
+/* =========================================================
+   4) LORIEN + OJOS
+   ========================================================= */
+.lorien-wrap{
+  position: relative;
+  width: min(44vmin, 400px);
+  aspect-ratio: 3/4;
+  animation: float 5.2s ease-in-out infinite;
+  filter: drop-shadow(0 30px 60px rgba(0,0,0,.55));
+}
+
+.lorien{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.eye{
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--eye-size);
+  height: calc(var(--eye-size) * var(--eye-ratio));
+  background: radial-gradient(60% 60% at 50% 40%, #fff 0 35%, #aee7ff 62%, rgba(120,200,255,0) 100%);
+  box-shadow:
+    0 0 14px 6px rgba(150,220,255,.7),
+    0 0 36px 12px rgba(90,170,255,.35);
+  animation: pulse 2.8s ease-in-out infinite;
+}
+.eye.left  { left: var(--eye-left-x);  top: var(--eye-left-y); }
+.eye.right { left: var(--eye-right-x); top: var(--eye-right-y); }
+
+
+/* =========================================================
+   5) ANIMACIONES (parpadeo, pulso, flotación)
+   ========================================================= */
+@keyframes blinkSync{
+  0%, 86%, 100%{
+    transform: translate(-50%,-50%) scaleY(1);
+    filter: brightness(1);
+  }
+  93%{
+    transform: translate(-50%,-50%) scaleY(.03);
+    filter: brightness(.55);
+  }
+}
+.blink{ animation: blinkSync .45s ease-in-out !important; }
+
+@keyframes pulse{
+  0%,100%{ transform: translate(-50%,-50%) scale(1) }
+  50%   { transform: translate(-50%,-50%) scale(1.05) }
+}
+
+@keyframes float{
+  0%,100%{ transform: translateY(0) rotate(-1deg) }
+  50%   { transform: translateY(-10px) rotate(1deg) }
+}
+
+
+/* =========================================================
+   6) TIPOGRAFÍA Y BOTONES
+   ========================================================= */
+.line{ font-size: clamp(18px, 2.6vw, 28px); text-align: center; }
+.name{ color: #a9e4ff; font-weight: 700; }
+
+.glow{
+  text-shadow:
+    0 0 8px  rgba(255,255,255,.35),
+    0 0 22px rgba(255,255,255,.25),
+    0 0 40px rgba(145,210,244,.25);
+}
+
+.btn{
+  display: inline-block;
+  padding: .9rem 1.8rem;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .15s ease;
+}
+
+.btn-dark{
+  background: #2b2b2b;
+  color: #fff;
+  border: 2px solid var(--gold);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06) inset,
+    0 10px 20px -10px rgba(0,0,0,.6),
+    0 0 18px rgba(253,205,63,.15);
+}
+.btn-dark:hover{ transform: translateY(-2px); filter: brightness(1.05); }
+.btn-dark:active{ transform: translateY(0) scale(.98); }
+
+
+/* =========================================================
+   7) TRANSICIÓN (logo + frase)
+   ========================================================= */
+.center{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;                /* Distancia entre logo y la frase */
+  padding: 12px;
+}
+
+.logo{
+  width: min(560px, 82vw);
+  display: block;
+  margin: 0 auto 4px;      /* Antes 6px: más pegado al texto */
+  filter: drop-shadow(0 0 18px rgba(203,162,234,.55));
+}
+
+.phrase{
+  margin: 0;
+  line-height: 1.15;
+  font-size: clamp(18px, 3.2vw, 30px);
+}
+
+
+/* =========================================================
+   8) WELCOME / HOME (tarjeta)
+   ========================================================= */
+.page-welcome{ --overlay-a: .68; }
+
+.card{
+  text-align: center;
+  padding: clamp(24px, 4vw, 48px);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  box-shadow:
+    0 30px 80px -28px rgba(0,0,0,.6),
+    inset 0 0 0 1px rgba(255,255,255,.08);
+
+  /* Compactar espacios internos: logo / texto / botón */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;               /* Distancia entre elementos de la tarjeta */
+}
+
+.logo-sm{
+  width: min(420px, 78vw);
+  margin-bottom: 4px;      /* Más cerca del texto */
+}
+
+.home-text{
+  margin: 0;               /* Elimina márgenes extra */
+  line-height: 1.15;
+  font-size: clamp(18px, 3.2vw, 26px);
+}
+
+.btn-dark{ margin-top: .25rem; } /* pequeña separación del texto */
+
+
+/* =========================================================
+   9) CONTROLES DE AUDIO
+   ========================================================= */
+.audio-toggle{
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
+  background: #2b2b2b;
+  color: #fff;
+  border: 2px solid var(--gold);
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow:
+    0 10px 20px -10px rgba(0,0,0,.6),
+    0 0 18px rgba(253,205,63,.15);
+}
+.audio-toggle:hover{ filter: brightness(1.05); }
+
+
+/* =========================================================
+   10) (OPCIONAL) UI DE CALIBRACIÓN DE OJOS
+      — Puedes borrar esta sección si ya no la utilizas.
+   ========================================================= */
+.handles{ position: absolute; inset: 0; }
+.handle{
+  position: absolute;
+  transform: translate(-50%,-50%);
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #00e0ff55; outline: 2px solid #00e0ff;
+  box-shadow: 0 0 20px #00e0ff; cursor: grab; z-index: 3;
+}
+.ring{
+  position: absolute; transform: translate(-50%,-50%);
+  border: 2px dashed #00e0ff; border-radius: 50%; z-index: 2;
+}
+.ui-hidden{ display: none; }
+
+.calib{
+  position: fixed; left: 12px; bottom: 12px;
+  background: #0b1230cc;
+  border: 1px solid #24306b; border-radius: 12px;
+  padding: 10px 12px; font-size: 14px; max-width: 420px;
+  z-index: 4;
+}
+.calib code{ background:#0c153a; padding:2px 6px; border-radius:6px; }
+button, input[type=range]{ accent-color: #79baff; }

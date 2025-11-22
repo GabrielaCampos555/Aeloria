@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aeloria</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg"></div><div class="shade"></div>
+
+  <!-- ===== Intro: Lorien ===== -->
+  <section id="intro" class="view view--active" aria-label="Introducción con Lorien">
+    <div class="stack">
+      <div class="lorien-wrap" id="wrap">
+        <img class="lorien" src="imagenes/spirit.png" alt="Lorien, espíritu anciano">
+        <div class="eye left"  id="eyeL"></div>
+        <div class="eye right" id="eyeR"></div>
+
+        <!-- Calibración (mostrar/ocultar con tecla C) -->
+        <div class="handles ui-hidden" id="handles">
+          <div class="handle" id="hL" title="Arrastra ojo izquierdo"></div>
+          <div class="ring" id="rL"></div>
+          <div class="handle" id="hR" title="Arrastra ojo derecho"></div>
+          <div class="ring" id="rR"></div>
+        </div>
+      </div>
+
+      <p class="line glow">Soy <span class="name">Lorien</span>... ¿quieres acompañarme?</p>
+<button id="btnAcompanhar" class="btn btn-dark">Acompañar</button>
+
+
+    <div class="calib ui-hidden" id="calib">
+      <strong>Calibración de ojos</strong> — <small>pulsa <code>C</code> para mostrar/ocultar</small><br>
+      Tamaño: <input type="range" id="size" min="2" max="22" value="10" step="0.5"> <span id="sz">10%</span>
+      <button id="save">Guardar</button>
+      <button id="reset">Reset</button>
+    </div>
+  </section>
+
+  <!-- ===== Transición ===== -->
+  <section id="transition" class="view view--hidden" aria-label="Transición a Aeloria">
+    <div class="center">
+      <img src="imagenes/logo-aeloria.png" alt="Aeloria" class="logo">
+      <h2 class="phrase glow">Acompaña a los espíritus a lo profundo del bosque</h2>
+    </div>
+  </section>
+  <script>
+  setTimeout(function() {
+    window.location.href = "home/index.html";
+  }, 3000);
+</script>
+
+  <!-- ===== Home (Welcome) ===== -->
+  
+
+  <audio id="bgm" src="imagenes/ambience.mp3" loop></audio>
+  <button id="audioToggle" class="audio-toggle" aria-pressed="false" aria-label="Silenciar/activar">🔊</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
