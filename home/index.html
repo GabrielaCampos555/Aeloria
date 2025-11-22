@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aeloria · Home</title>
+  <meta name="description" content="Portafolio de Gaby Campos · Aeloria." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- HERO PARALLAX -->
+  <main class="hero" aria-label="Bosque Aeloria">
+    <img class="layer bg" src="assets/bg_fondo_fullhd.png" alt="" data-depth="0.04" data-depth-scroll="0.12"/>
+    <div class="fireflies back" aria-hidden="true"></div>
+    <img class="layer front" src="assets/front_fullhd.png" alt="" data-depth="0.22" data-depth-scroll="0.28"/>
+    <div class="fireflies frontFF" aria-hidden="true"></div>
+
+    <!-- Bottom arrow -->
+    <button id="openMenu" class="arrowDock" aria-expanded="false" aria-controls="sheet" aria-label="Explorar">
+      <span class="line"></span><span class="chev">▾</span>
+    </button>
+  </main>
+
+  <!-- BOTTOM SHEET MENU -->
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-head">
+      <h2>¿Qué parte del bosque visitas?</h2>
+      <button id="closeSheet" class="close">×</button>
+    </div>
+    <section class="menuGrid">
+      <!-- Claro Publicitario -->
+      <a class="menuCard" href="carrusel claro publicitario/index.html">
+        <div class="thumb"></div>
+        <h3>Claro Publicitario</h3>
+        <p>Aquí las ideas florecen con Luxien.</p>
+      </a>
+
+      <a class="menuCard" href="Carrusel lago de historias/index.html">
+        <div class="thumb"></div>
+        <h3>Lago de Historias</h3>
+        <p>Donde Cael transforma historias en movimiento.</p>
+      </a>
+
+      <a class="menuCard" href="sendero social-carrusel/index.html">
+        <div class="thumb"></div>
+        <h3>Sendero Social</h3>
+        <p>Lyra ilumina tu camino al contenido.</p>
+      </a>
+
+      <a class="menuCard" href="bosque-ilustrado/index.html">
+        <div class="thumb"></div>
+        <h3>Bosque Ilustrado</h3>
+        <p>Solenne pinta mundos para explorar.</p>
+      </a>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
