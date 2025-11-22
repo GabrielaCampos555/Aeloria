@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carrusel Aeloria — Fan 3D Claro Dorado v2</title>
+
+  <style>
+    :root{
+      --fg:#fff;
+      --w:360px;
+      --h:480px;
+      --gap:60;        /* gap base en px (solo número para JS) */
+      --depth:320;     /* profundidad base en px (solo número) */
+      --rot:-20;       /* grados (solo número) */
+      --dur:.6s;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      color:var(--fg);
+      font-family:'Caviar Dreams',system-ui,Segoe UI,Inter,Roboto,sans-serif;
+      background:url('assets/fondo.png') center/cover no-repeat fixed;
+      overflow:hidden;
+      position:relative;
+    }
+    body::before{
+      content:'';
+      position:fixed;
+      inset:0;
+      background:radial-gradient(circle at 50% 18%, rgba(255,238,170,.25) 0%, transparent 60%);
+      pointer-events:none;
+    }
+    .wrap{
+      min-height:100dvh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:26px;
+    }
+    .stage{
+      width:min(100%,1280px);
+      perspective:1400px;
+      position:relative;
+      padding:10px 40px 50px;
+      overflow:visible;
+    }
+    .carousel{
+      position:relative;
+      width:100%;
+      height:var(--h);
+      display:grid;
+      place-items:center;
+      transform-style:preserve-3d;
+      will-change:transform;
+      overflow:visible;
+    }
+    .card{
+      position:absolute;
+      width:var(--w);
+      height:var(--h);
+      background:rgba(15,15,15,.72);
+      border-radius:24px;
+      overflow:hidden;
+      transform-style:preserve-3d;
+      box-shadow:0 0 22px rgba(255,220,160,.28);
+      transition:
+        transform var(--dur) cubic-bezier(.2,.7,.2,1),
+        filter var(--dur),
+        opacity var(--dur);
+      cursor:pointer;
+      backdrop-filter:blur(6px);
+    }
+    .media{
+      position:relative;
+      width:100%;
+      height:100%;
+      display:grid;
+      place-items:center;
+    }
+    .media img,
+    .media video{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+    }
+    .card.dim{
+      filter:saturate(.85) brightness(.85);
+      opacity:.95;
+    }
+    .controls{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
+    }
+    .btn{
+      background:radial-gradient(circle at center, rgba(255,230,160,.35), rgba(60,40,10,.55));
+      border:1px solid rgba(255,220,150,.35);
+      border-radius:12px;
+      padding:10px 16px;
+      color:#fff;
+      box-shadow:0 0 10px rgba(255,210,120,.18);
+      cursor:pointer;
+      transition:transform .25s ease, box-shadow .35s ease;
+    }
+    .btn:hover{
+      transform:scale(1.08);
+      box-shadow:0 0 18px rgba(255,220,160,.6),0 0 36px rgba(255,200,120,.22);
+    }
+    .index{
+      opacity:.9;
+      font-variant-numeric:tabular-nums;
+    }
+
+    /* MODAL */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      place-items:center;
+      background:rgba(0,0,0,.7);
+      padding:20px;
+      backdrop-filter:blur(6px);
+      z-index:2000;
+    }
+    .modal.open{display:grid;}
+    .dialog{
+  position:relative;
+  width:min(1100px,100%);
+  max-height:90dvh;
+  height:min(700px,90dvh);              /* 👉 altura controlada del modal */
+  background:linear-gradient(135deg, rgba(10,25,15,.7), rgba(10,10,5,.9));
+  border-radius:28px;
+  overflow:hidden;
+  display:grid;
+  grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);
+  gap:0;
+  box-shadow:0 0 40px rgba(0,0,0,.6);
+}
+    @media (max-width:900px){
+      .dialog{
+        grid-template-columns:1fr;
+        max-height:95dvh;
+      }
+    }
+    .dialog .full{
+  position:relative;
+  background:rgba(0,0,0,.6);
+  display:grid;
+  place-items:center;
+  padding:10px;
+  height:100%;                          /* 👉 ocupa todo el alto del modal */
+}
+
+.dialog .full img,
+.dialog .full video{
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;                    /* 👉 se ve completa, sin cortar */
+  border-radius:18px;
+  box-shadow:0 0 20px rgba(0,0,0,.6);
+}
+    .info{
+  padding:32px 32px 26px;
+  color:#fef7e6;
+  font-family:'Manrope',system-ui,sans-serif;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  justify-content:flex-start;
+}
+    .info h3{
+      font-family:'Sora',system-ui,sans-serif;
+      font-size:1.7rem;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      margin:0 0 10px;
+    }
+    .info p{margin:0;font-size:.98rem;line-height:1.6;}
+    .info small{
+      opacity:.8;
+      font-size:.8rem;
+      display:block;
+      margin-top:10px;
+    }
+    .close{
+      position:absolute;
+      top:12px;
+      right:14px;
+      width:36px;
+      height:36px;
+      border-radius:999px;
+      border:none;
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      background:rgba(0,0,0,.45);
+      color:#fffbe8;
+      box-shadow:0 0 14px rgba(0,0,0,.6);
+      z-index:10;
+    }
+
+    /* Flechas internas */
+    .inner-nav{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:30;
+      background:transparent;
+      border:none;
+      padding:0;
+      cursor:pointer;
+    }
+    .inner-nav svg{
+      width:42px;
+      height:42px;
+      stroke:#FFF9C4;
+      stroke-width:3;
+      fill:none;
+      filter:drop-shadow(0 2px 6px rgba(0,0,0,.55))
+             drop-shadow(0 0 10px rgba(255,235,59,.35));
+      transition:transform .2s ease;
+    }
+    .inner-nav:hover svg{transform:scale(1.1);}
+    .inner-prev{left:18px;}
+    .inner-next{right:18px;}
+
+    @media (max-width:800px){
+      .inner-nav svg{width:32px;height:32px;}
+      .inner-prev{left:10px;}
+      .inner-next{right:10px;}
+    }
+
+    /* Puntos de paginación dentro del modal */
+    .inner-dots{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:12px;
+      display:flex;
+      gap:8px;
+      justify-content:center;
+      z-index:40;
+    }
+    .inner-dots .dot{
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:#E8D36B;
+      opacity:.45;
+      transition:transform .2s ease, opacity .2s ease, box-shadow .2s ease;
+      box-shadow:0 0 8px rgba(232,211,107,.35);
+    }
+    .inner-dots .dot.active{
+      transform:scale(1.3);
+      opacity:1;
+      box-shadow:0 0 12px rgba(232,211,107,.7);
+    }
+
+  </style>
+
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <!-- Flecha para regresar al home de Aeloria -->
+  <a href="../index.html"
+     style="position:absolute;top:20px;left:20px;z-index:1000;color:white;font-size:40px;text-decoration:none;">
+    &#8592;
+  </a>
+
+  <div class="wrap">
+    <div class="stage">
+      <div class="carousel" id="carousel">
+
+        <!-- PLASTICENTER -->
+        <article class="card"
+          data-desc="Proyecto publicitario para Plasticenter: diseño de banners principales, giveaway y sitio web responsivo enfocado en conversión."
+          data-full="assets/plastic1.png"
+          data-gallery="assets/plastic1.png, assets/plastic2.png, assets/plastic3.png, assets/plastic4.png"
+          data-title="Plasticenter — Campaña digital">
+          <div class="media">
+            <img src="assets/plastic1.png" alt="Plasticenter — Campaña digital">
+          </div>
+        </article>
+
+        <!-- MAYAR CHERRY INTENSE -->
+        <article class="card"
+          data-desc="Fotografía publicitaria del perfume Mayar Cherry Intense, explorando luz, textura y composición en set de estudio."
+          data-full="assets/lattafa.png"
+          data-gallery="assets/lattafa.png, assets/lataffa2.png"
+          data-title="Mayar Cherry Intense — Fotografía de producto">
+          <div class="media">
+            <img src="assets/lattafa.png" alt="Perfume Mayar Cherry Intense">
+          </div>
+        </article>
+
+        
+        <!-- IDENTIDAD VISUAL PERSONAL -->
+<article class="card"
+  data-desc="Identidad visual personal: símbolo, tipografía y aplicaciones gráficas para marca profesional como diseñadora web multimedia."
+  data-full="assets/flyer.png"
+  data-gallery="assets/flyer.png"
+  data-title="Identidad visual — Gabriela Campos">
+  <div class="media">
+    <img src="assets/flyer.png" alt="Identidad visual — Gabriela Campos">
+  </div>
+</article>
+        <!-- OJO DULCE - VIDEO -->
+        <article class="card"
+          data-desc="Micro pieza de motion graphic inspirada en cosmética, explorando ritmo, color y gesto en formato corto para redes."
+          data-full="assets/dulce.mp4"
+          data-gallery="assets/dulce.mp4"
+          data-title="Ojo Dulce — Micro motion branding">
+          <div class="media">
+            <video src="assets/dulce.mp4" preload="metadata" muted playsinline></video>
+          </div>
+        </article>
+
+      </div>
+    </div>
+
+    <!-- Controles del carrusel principal -->
+    <div class="controls">
+      <button class="btn" id="prev">←</button>
+      <span class="index" id="index">1 / 4</span>
+      <button class="btn" id="next">→</button>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal" id="modal">
+    <div class="dialog">
+      <button class="close" id="close">✕</button>
+
+      <div class="full" id="fullMedia"></div>
+      <div class="inner-dots" id="innerDots"></div>
+
+      <button class="inner-nav inner-prev" title="Imagen anterior">
+        <svg viewBox="0 0 24 24">
+          <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <button class="inner-nav inner-next" title="Imagen siguiente">
+        <svg viewBox="0 0 24 24">
+          <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <aside class="info">
+        <h3 id="mTitle"></h3>
+        <p id="mDesc"></p>
+       
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const $ = s => document.querySelector(s);
+      const $$ = s => [...document.querySelectorAll(s)];
+
+      const cards = $$('.card');
+      const N = cards.length;
+      let i = 0;
+
+      function metrics() {
+        const w = cards[0].getBoundingClientRect().width;
+        const GAP = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 60;
+        const DEP = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--depth')) || 320;
+        const ROT = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rot')) || -20;
+        return { w, GAP, DEP, ROT };
+      }
+
+      function render() {
+        const { w, GAP, DEP, ROT } = metrics();
+        const stepX = w * 0.95 + GAP;
+
+        cards.forEach((c, idx) => {
+          const off = idx - i;
+          const abs = Math.abs(off);
+          const sign = Math.sign(off);
+          const x = off * stepX;
+          const z = -abs * DEP;
+          const rot = sign * ROT;
+          const scale = Math.max(1 - abs * 0.12, 0.6);
+          const y = abs * 6;
+
+          c.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rot}deg) scale(${scale})`;
+          c.classList.toggle('dim', abs > 0);
+          c.style.zIndex = String(100 - abs);
+        });
+
+        $('#index').textContent = `${i + 1} / ${N}`;
+      }
+
+      function go(d) {
+        i = (i + d + N) % N;
+        render();
+      }
+
+      $('#prev').onclick = () => go(-1);
+      $('#next').onclick = () => go(1);
+      window.addEventListener('resize', render);
+
+      // --- Modal y galería interna ---
+      const modal = $('#modal');
+      const fullBox = $('#fullMedia');
+      const dotsWrap = $('#innerDots');
+      const innerPrev = document.querySelector('.inner-prev');
+      const innerNext = document.querySelector('.inner-next');
+      let gallery = [];
+      let gi = 0;
+
+      function renderInner() {
+        if (!gallery.length) return;
+        const src = gallery[gi];
+        const ext = src.split('.').pop().toLowerCase();
+
+        fullBox.innerHTML = '';
+
+        if (['mp4', 'webm', 'mov'].includes(ext)) {
+          const v = document.createElement('video');
+          v.src = src;
+          v.controls = true;
+          v.autoplay = true;
+          v.playsInline = true;
+          fullBox.appendChild(v);
+        } else {
+          const img = document.createElement('img');
+          img.src = src;
+          fullBox.appendChild(img);
+        }
+
+        // dots
+        dotsWrap.querySelectorAll('.dot').forEach((d, idx) => {
+          d.classList.toggle('active', idx === gi);
+        });
+      }
+
+      function openModal(card) {
+        const raw = card.dataset.gallery || card.dataset.full || '';
+        gallery = raw.split(',').map(s => s.trim()).filter(Boolean);
+        gi = 0;
+
+        // Dots
+        dotsWrap.innerHTML = '';
+        gallery.forEach((_, idx) => {
+          const dot = document.createElement('div');
+          dot.className = 'dot' + (idx === 0 ? ' active' : '');
+          dot.addEventListener('click', () => {
+            gi = idx;
+            renderInner();
+          });
+          dotsWrap.appendChild(dot);
+        });
+
+        $('#mTitle').textContent = card.dataset.title || '';
+        $('#mDesc').textContent = card.dataset.desc || '';
+
+        modal.classList.add('open');
+        document.body.classList.add('modal-open');
+
+        renderInner();
+
+        // Funciones globales para teclado
+        window.__modalNext = () => {
+          if (!gallery.length) return;
+          gi = (gi + 1 + gallery.length) % gallery.length;
+          renderInner();
+        };
+        window.__modalPrev = () => {
+          if (!gallery.length) return;
+          gi = (gi - 1 + gallery.length) % gallery.length;
+          renderInner();
+        };
+      }
+
+      function closeModal() {
+        modal.classList.remove('open');
+        document.body.classList.remove('modal-open');
+        fullBox.innerHTML = '';
+        dotsWrap.innerHTML = '';
+        window.__modalNext = null;
+        window.__modalPrev = null;
+      }
+
+      $('#close').onclick = closeModal;
+      modal.addEventListener('click', e => {
+        if (e.target === modal) closeModal();
+      });
+
+      innerPrev.addEventListener('click', () => window.__modalPrev && window.__modalPrev());
+      innerNext.addEventListener('click', () => window.__modalNext && window.__modalNext());
+
+      // Click en card: centrar y abrir modal
+      cards.forEach((c, idx) => {
+        c.addEventListener('click', () => {
+          i = idx;
+          render();
+          openModal(c);
+        });
+      });
+
+      // Teclado: flechas para carrusel y para galería interna
+      window.addEventListener('keydown', e => {
+        if (modal.classList.contains('open')) {
+          if (e.key === 'Escape') closeModal();
+          if (e.key === 'ArrowRight' && window.__modalNext) window.__modalNext();
+          if (e.key === 'ArrowLeft' && window.__modalPrev) window.__modalPrev();
+        } else {
+          if (e.key === 'ArrowRight') go(1);
+          if (e.key === 'ArrowLeft') go(-1);
+        }
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
